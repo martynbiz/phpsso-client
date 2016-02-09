@@ -10,7 +10,7 @@ Install using composer
 "minimum-stability": "dev",
 "repositories": [
     {
-        "url": "http://gitlab.metroworks.co.jp/atsumarecq/acq.git",
+        "url": "http://gitlab.metroworks.co.jp/sso/mwauth-client.git",
         "type": "git"
     },
 ],
@@ -29,7 +29,7 @@ To test, you can dump $_SESSION and see if the session variables set from MWAuth
 var_dump($_SESSION);
 ```
 
-If they are there, then you're good to start setting up the client. Otherwise you'll need to debug session and cookie configurations in PHP or the current app.
+If they are there, then you're good to start setting up the client. Otherwise you'll need to debug session and cookie configurations in PHP or the current app. Enjoy :)
 
 Assumming that the session variables are there, we'll configure the client for the MWAuth installation:
 
@@ -80,12 +80,35 @@ $attributes = $this->getLogoutUrl(array(
 ));
 ```
 
+Logout URL will display a logout landing page, we don't logout on GET. However a POST with
+_METHOD=DELETE parameter (browsers don't support DELETE method) will logout the user out and
+redirect to the returnTo. The landing page is just to allow support for non-JS situations.
+
+Something like the following can be used to make a POST/DELETE request to the logout URL:
+
+```
+<a href="#" class="logoutBtn">Logout</a>
+<form id="logoutForm" method="POST" action="<?php echo $client->getLogoutUrl(); ?>">
+    <input type="hidden" name="_METHOD" value="DELETE">
+</form>
+```
+
 Note: The URLs returned by getLoginUrl, getRegisterUrl and getLogoutUrl can be a GET request (show form) or
 a POST request for handling form submissions. Saves us having to define many URLs here.
 
-forceLogin
+getCurrentUrl
 
-Will destroy the current session variables and redirect the user to the login screen of MWAuth app.
+Useful helper method to build the URL from the $_SERVER if needed. Note: get*Url methods above will
+set this automatically for returnTo if not given.
+
+```
+$attributes = $this->getCurrentUrl();
+```
+
+requireLogin
+
+Will redirect the browser to the login screen, only if the user is not currently authenticated.
+Otherwise, will do nothing.
 
 ```
 $attributes = $this->forceLogin(array(
@@ -93,10 +116,10 @@ $attributes = $this->forceLogin(array(
 ));
 ```
 
-requireLogin
+forceLogin
 
-Will only redirect the browser to the login screen if the user is not currently authenticated.
-Otherwise, will do nothing.
+Will redirect the browser to the login screen even if the user is not currently
+authenticated - the current session variables, if exist, will be deleted.
 
 ```
 $attributes = $this->forceLogin(array(

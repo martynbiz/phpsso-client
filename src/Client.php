@@ -142,7 +142,7 @@ class Client
      {
          // set default returnTo to the existing page
          if (! array_key_exists('returnTo', $params))
-             $params['returnTo'] = self::getUrl();
+             $params['returnTo'] = self::getCurrentUrl();
 
          if (! empty($params)) {
              $url.= '?' . http_build_query($params);
@@ -156,7 +156,7 @@ class Client
      * request this every call
      * @return string
      */
-    public static function getUrl() { //($includePortNumber=false) {
+    public static function getCurrentUrl() { //($includePortNumber=false) {
 
         // get the protocol and domain e.g. http://mydomain.com
         $url  = @( isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on' ) ? 'https://'.$_SERVER["SERVER_NAME"] :  'http://'.$_SERVER["SERVER_NAME"];

@@ -210,4 +210,16 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             'returnTo' => 'http://example.com',
         ));
     }
+
+    // getCurretUrl
+
+    public function test_get_current_url()
+    {
+        // Get a reference to the singleton instance of Zend_Auth
+        $client = new Client($this->storageMock);
+
+        $actual = $client->getCurrentUrl();
+
+        $this->assertEquals('http://localhost/questions', $actual);
+    }
 }
