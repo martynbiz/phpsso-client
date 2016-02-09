@@ -47,19 +47,19 @@ Now we can gather information about the users session:
 isAuthenticated
 
 ```
-$result = $this->isAuthenticated();
+$result = $client->isAuthenticated();
 ```
 
 getAttributes
 
 ```
-$attributes = $this->getAttributes();
+$attributes = $client->getAttributes();
 ```
 
 getLoginUrl
 
 ```
-$attributes = $this->getLoginUrl(array(
+$attributes = $client->getLoginUrl(array(
     'returnTo' => 'http://www.example.com', // defaults to current page if not set
 ));
 ```
@@ -67,7 +67,7 @@ $attributes = $this->getLoginUrl(array(
 getRegisterUrl
 
 ```
-$attributes = $this->getRegisterUrl(array(
+$attributes = $client->getRegisterUrl(array(
     'returnTo' => 'http://www.example.com',  // defaults to current page if not set
 ));
 ```
@@ -75,7 +75,7 @@ $attributes = $this->getRegisterUrl(array(
 getLogoutUrl
 
 ```
-$attributes = $this->getLogoutUrl(array(
+$attributes = $client->getLogoutUrl(array(
     'returnTo' => 'http://www.example.com',  // defaults to current page if not set
 ));
 ```
@@ -102,7 +102,7 @@ Useful helper method to build the URL from the $_SERVER if needed. Note: get*Url
 set this automatically for returnTo if not given.
 
 ```
-$attributes = $this->getCurrentUrl();
+$attributes = $client->getCurrentUrl();
 ```
 
 requireLogin
@@ -111,7 +111,7 @@ Will redirect the browser to the login screen, only if the user is not currently
 Otherwise, will do nothing.
 
 ```
-$attributes = $this->forceLogin(array(
+$attributes = $client->forceLogin(array(
     'returnTo' => 'http://www.example.com',  // defaults to current page if not set
 ));
 ```
@@ -122,7 +122,7 @@ Will redirect the browser to the login screen even if the user is not currently
 authenticated - the current session variables, if exist, will be deleted.
 
 ```
-$attributes = $this->forceLogin(array(
+$attributes = $client->forceLogin(array(
     'returnTo' => 'http://www.example.com',  // defaults to current page if not set
 ));
 ```
