@@ -26,9 +26,8 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             ->getMock();
     }
 
-    public function testInitialization()
+    public function test_initialization()
     {
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock);
 
         $this->assertTrue($client instanceof Client);
@@ -43,7 +42,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             ->method('getContents')
             ->willReturn(array( 'name' => 'Martyn' ));
 
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock);
 
         $this->assertTrue($client->isAuthenticated());
@@ -56,7 +54,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             ->method('getContents')
             ->willReturn(array());
 
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock);
 
         $this->assertFalse($client->isAuthenticated());
@@ -73,7 +70,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             ->method('getContents')
             ->willReturn($contents);
 
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock);
 
         $this->assertEquals($contents, $client->getAttributes());
@@ -88,7 +84,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
             ->expects( $this->once() )
             ->method('emptyContents');
 
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock);
 
         $client->clearAttributes();
@@ -98,7 +93,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function test_get_login_url_returns_url_with_return_to_parameter()
     {
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock, $this->urls);
 
         $expected = $this->urls['login_url'] . '?returnTo=http%3A%2F%2Fexample.com%2Fabout';
@@ -111,7 +105,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function test_get_login_url_returns_url_with_default_return_to_parameter()
     {
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock, $this->urls);
 
         $expected = $this->urls['login_url'] . '?returnTo=http%3A%2F%2Flocalhost%2Fquestions';
@@ -125,7 +118,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
      */
     public function test_get_login_url_throws_exception_when_url_missing()
     {
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock); // no url given
 
         $actual = $client->getLoginUrl(array(
@@ -137,7 +129,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function test_get_logout_url_returns_url_with_return_to_parameter()
     {
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock, $this->urls);
 
         $expected = $this->urls['logout_url'] . '?returnTo=http%3A%2F%2Fexample.com%2Fabout';
@@ -150,7 +141,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function test_get_logout_url_returns_url_with_default_return_to_parameter()
     {
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock, $this->urls);
 
         $expected = $this->urls['logout_url'] . '?returnTo=http%3A%2F%2Flocalhost%2Fquestions';
@@ -164,7 +154,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
      */
     public function test_get_logout_url_throws_exception_when_url_missing()
     {
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock); // no url given
 
         $actual = $client->getLogoutUrl(array(
@@ -176,7 +165,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function test_get_register_url_returns_url_with_return_to_parameter()
     {
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock, $this->urls);
 
         $expected = $this->urls['register_url'] . '?returnTo=http%3A%2F%2Fexample.com%2Fabout';
@@ -189,7 +177,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function test_get_register_url_returns_url_with_default_return_to_parameter()
     {
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock, $this->urls);
 
         $expected = $this->urls['register_url'] . '?returnTo=http%3A%2F%2Flocalhost%2Fquestions';
@@ -203,7 +190,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
      */
     public function test_get_register_url_throws_exception_when_url_missing()
     {
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock); // no url given
 
         $actual = $client->getRegisterUrl(array(
@@ -215,7 +201,6 @@ class ClientTest extends \PHPUnit_Framework_TestCase
 
     public function test_get_current_url()
     {
-        // Get a reference to the singleton instance of Zend_Auth
         $client = new Client($this->storageMock);
 
         $actual = $client->getCurrentUrl();

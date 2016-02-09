@@ -1,6 +1,10 @@
 # MWAuth Client #
 
-Framework agnostic class which provides access to session variables set from MWAuth authentication app.
+Framework agnostic library which provides access to session variables set from MWAuth authentication app.
+
+TODO
+
+* tests for session class (in cli, can define global $_SESSION perhaps?)
 
 ## Installation ##
 
