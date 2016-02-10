@@ -66,22 +66,22 @@ class Client
         $this->storage->emptyContents();
     }
 
-    /**
-    * Redirect the browser to the login form always, even if the user is already
-    * authenticated
-    * @param array $params e.g. GET params returnTo=http://...
-    * @return void
-    */
-    public function forceLogin($params=array())
-    {
-        // we wanna destroy the current session variables otherwise the mwauth app
-        // will return us to the app as we're already logged in.
-        $this->clearAttributes();
-
-        // no that we're signed out, we can requireLogin which will redirect to the
-        // login page
-        $this->requireLogin($params);
-    }
+    // /**
+    // * Redirect the browser to the login form always, even if the user is already
+    // * authenticated
+    // * @param array $params e.g. GET params returnTo=http://...
+    // * @return void
+    // */
+    // public function forceLogin($params=array())
+    // {
+    //     // we wanna destroy the current session variables otherwise the mwauth app
+    //     // will return us to the app as we're already logged in.
+    //     $this->clearAttributes();
+    //
+    //     // no that we're signed out, we can requireLogin which will redirect to the
+    //     // login page
+    //     $this->requireLogin($params);
+    // }
 
     /**
     * Redirects to the login page if, and only if, the user is not authenticated
@@ -89,10 +89,29 @@ class Client
     * @param array $params e.g. GET params returnTo=http://...
     * @return void
     */
-    public function requireLogin($params=array())
+    public function login($params=array())
     {
-        // redirect to the login page
         // TODO do we have a header setter object for redirects? can't test header(...)
+
+        // redirect to url
+        if (! $this->isAuthenticated())
+            $this->redirect( $this->getLoginUrl($params) );
+    }
+
+    /**
+    * Logout will simply delete the session varaibles, and reload the current page
+    * @return void
+    */
+    public function logout()
+    {
+        // TODO do we have a header setter object for redirects? can't test header(...)
+
+        // delete session vars
+        $this->clearAttributes();
+
+        // redirect to url
+        if ($this->isAuthenticated())
+            $this->redirect( $this->getCurrentUrl() );
     }
 
     /**
@@ -136,6 +155,26 @@ class Client
     }
 
     /**
+     * Fetches the current URL, allows us to set default returnTo without having to
+     * request this every call
+     * @return string
+     */
+    public static function getCurrentUrl() { //($includePortNumber=false) {
+
+       // get the protocol and domain e.g. http://mydomain.com
+       $url  = @( isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on' ) ? 'https://'.$_SERVER["SERVER_NAME"] :  'http://'.$_SERVER["SERVER_NAME"];
+
+       // include the port number e.g. mydomain.com:80
+       // if($includePortNumber)
+           $url .= ( (int) $_SERVER["SERVER_PORT"] !== 80 ) ? ":".$_SERVER["SERVER_PORT"] : "";
+
+       // get the path to the resource e.g. /path/to/resource?params=should-be-included-too
+       $url .= $_SERVER["REQUEST_URI"];
+
+       return $url;
+    }
+
+    /**
      * Will generate a url from a base url, and attach params (inc default returnTo)
      */
      protected function buildUrlWithParams($url, $params=array())
@@ -151,23 +190,12 @@ class Client
          return $url;
      }
 
-    /**
-     * Fetches the current URL, allows us to set default returnTo without having to
-     * request this every call
-     * @return string
-     */
-    public static function getCurrentUrl() { //($includePortNumber=false) {
-
-        // get the protocol and domain e.g. http://mydomain.com
-        $url  = @( isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on' ) ? 'https://'.$_SERVER["SERVER_NAME"] :  'http://'.$_SERVER["SERVER_NAME"];
-
-        // include the port number e.g. mydomain.com:80
-        // if($includePortNumber)
-            $url .= ( (int) $_SERVER["SERVER_PORT"] !== 80 ) ? ":".$_SERVER["SERVER_PORT"] : "";
-
-        // get the path to the resource e.g. /path/to/resource?params=should-be-included-too
-        $url .= $_SERVER["REQUEST_URI"];
-
-        return $url;
-    }
+     /**
+      * Perform a redirect to login, logout, etc
+      */
+     protected function redirect($url)
+     {
+         header('Location: ' . $url);
+         die();
+     }
 }
