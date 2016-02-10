@@ -83,36 +83,36 @@ class Client
     //     $this->requireLogin($params);
     // }
 
-    /**
-    * Redirects to the login page if, and only if, the user is not authenticated
-    * Otherwise, do nothing
-    * @param array $params e.g. GET params returnTo=http://...
-    * @return void
-    */
-    public function login($params=array())
-    {
-        // TODO do we have a header setter object for redirects? can't test header(...)
-
-        // redirect to url
-        if (! $this->isAuthenticated())
-            $this->redirect( $this->getLoginUrl($params) );
-    }
-
-    /**
-    * Logout will simply delete the session varaibles, and reload the current page
-    * @return void
-    */
-    public function logout()
-    {
-        // TODO do we have a header setter object for redirects? can't test header(...)
-
-        // delete session vars
-        $this->clearAttributes();
-
-        // redirect to url
-        if ($this->isAuthenticated())
-            $this->redirect( $this->getCurrentUrl() );
-    }
+    // /**
+    // * Redirects to the login page if, and only if, the user is not authenticated
+    // * Otherwise, do nothing
+    // * @param array $params e.g. GET params returnTo=http://...
+    // * @return void
+    // */
+    // public function login($params=array())
+    // {
+    //     // TODO do we have a header setter object for redirects? can't test header(...)
+    //
+    //     // redirect to url
+    //     if (! $this->isAuthenticated())
+    //         $this->redirect( $this->getLoginUrl($params) );
+    // }
+    //
+    // /**
+    // * Logout will simply delete the session varaibles, and reload the current page
+    // * @return void
+    // */
+    // public function logout()
+    // {
+    //     // TODO do we have a header setter object for redirects? can't test header(...)
+    //
+    //     // delete session vars
+    //     $this->clearAttributes();
+    //
+    //     // redirect to url
+    //     if ($this->isAuthenticated())
+    //         $this->redirect( $this->getCurrentUrl() );
+    // }
 
     /**
     * Get the login URL, the same URL is used for GET and POST requests
