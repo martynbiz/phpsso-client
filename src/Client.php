@@ -128,6 +128,19 @@ class Client
     }
 
     /**
+    * Get the login URL, the same URL is used for GET and POST requests
+    * @param array $params e.g. GET params returnTo=http://...
+    * @return string
+    */
+    public function getFacebookLoginUrl($params=array())
+    {
+        if (! array_key_exists('login_url', $this->options))
+            throw new MissingUrlException('Login URL not set in client');
+
+        return $this->buildUrlWithParams($this->options['login_url'] . '/facebook', $params);
+    }
+
+    /**
     * Get the logout URL, the same URL is used for GET and POST requests
     * @param array $params e.g. GET params returnTo=http://...
     * @return string
@@ -161,17 +174,20 @@ class Client
      */
     public static function getCurrentUrl() { //($includePortNumber=false) {
 
-       // get the protocol and domain e.g. http://mydomain.com
-       $url  = @( isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on' ) ? 'https://'.$_SERVER["SERVER_NAME"] :  'http://'.$_SERVER["SERVER_NAME"];
+        // get the protocol and domain e.g. http://mydomain.com
+        $url  = @( isset($_SERVER["HTTPS"]) and $_SERVER["HTTPS"] == 'on' ) ? 'https://'.$_SERVER["SERVER_NAME"] :  'http://'.$_SERVER["SERVER_NAME"];
 
-       // include the port number e.g. mydomain.com:80
-       // if($includePortNumber)
+        // include the port number e.g. mydomain.com:80
+        // if($includePortNumber)
            $url .= ( (int) $_SERVER["SERVER_PORT"] !== 80 ) ? ":".$_SERVER["SERVER_PORT"] : "";
 
-       // get the path to the resource e.g. /path/to/resource?params=should-be-included-too
-       $url .= $_SERVER["REQUEST_URI"];
+        // get the path to the resource e.g. /path/to/resource?params=should-be-included-too
+        $url .= $_SERVER["REQUEST_URI"];
 
-       return $url;
+        if (! empty($_SERVER['QUERY_STRING']))
+            $url.= '?' . $_SERVER['QUERY_STRING'];
+
+        return $url;
     }
 
     /**
