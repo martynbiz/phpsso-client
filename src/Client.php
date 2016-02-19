@@ -66,53 +66,28 @@ class Client
         $this->storage->emptyContents();
     }
 
-    // /**
-    // * Redirect the browser to the login form always, even if the user is already
-    // * authenticated
-    // * @param array $params e.g. GET params returnTo=http://...
-    // * @return void
-    // */
-    // public function forceLogin($params=array())
-    // {
-    //     // we wanna destroy the current session variables otherwise the mwauth app
-    //     // will return us to the app as we're already logged in.
-    //     $this->clearAttributes();
-    //
-    //     // no that we're signed out, we can requireLogin which will redirect to the
-    //     // login page
-    //     $this->requireLogin($params);
-    // }
+    /**
+     * This is called and will check if the user requires redirecting to the auth
+     * app to login if auth_token is set.
+     */
+    public function rememberMe($params=array())
+    {
+        // only trigger remember me code if not authenticated, we don't need this
+        // at all if they are already signed in (duh)
+        if (!$this->isAuthenticated()) {
 
-    // /**
-    // * Redirects to the login page if, and only if, the user is not authenticated
-    // * Otherwise, do nothing
-    // * @param array $params e.g. GET params returnTo=http://...
-    // * @return void
-    // */
-    // public function login($params=array())
-    // {
-    //     // TODO do we have a header setter object for redirects? can't test header(...)
-    //
-    //     // redirect to url
-    //     if (! $this->isAuthenticated())
-    //         $this->redirect( $this->getLoginUrl($params) );
-    // }
-    //
-    // /**
-    // * Logout will simply delete the session varaibles, and reload the current page
-    // * @return void
-    // */
-    // public function logout()
-    // {
-    //     // TODO do we have a header setter object for redirects? can't test header(...)
-    //
-    //     // delete session vars
-    //     $this->clearAttributes();
-    //
-    //     // redirect to url
-    //     if ($this->isAuthenticated())
-    //         $this->redirect( $this->getCurrentUrl() );
-    // }
+            // redirect if token found
+            $authToken = @$_COOKIE[ $this->options['auth_token']['name'] ];
+            if ($authToken) {
+
+                // redirect to login, but with passive
+                $loginUrl = $this->getLoginUrl(array_merge($params, array(
+                    'passive' => true,
+                )));
+                $this->redirect($loginUrl);
+            }
+        }
+    }
 
     /**
     * Get the login URL, the same URL is used for GET and POST requests
