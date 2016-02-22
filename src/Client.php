@@ -70,7 +70,7 @@ class Client
      * This is called and will check if the user requires redirecting to the auth
      * app to login if auth_token is set.
      */
-    public function rememberMe($params=array())
+    public function checkAuthToken($params=array())
     {
         // only trigger remember me code if not authenticated, we don't need this
         // at all if they are already signed in (duh)
