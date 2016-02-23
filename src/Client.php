@@ -56,15 +56,15 @@ class Client
         return $this->storage->getContents();
     }
 
-    /**
-    * Essentially logging a user out of all applications - used mainly when we
-    * do a forceLogin. Will delete sso/mwauth session variables.
-    * @return void
-    */
-    public function clearAttributes()
-    {
-        $this->storage->emptyContents();
-    }
+    // /**
+    // * Essentially logging a user out of all applications - used mainly when we
+    // * do a forceLogin. Will delete sso/mwauth session variables.
+    // * @return void
+    // */
+    // public function clearAttributes()
+    // {
+    //     $this->storage->emptyContents();
+    // }
 
     /**
      * This is called and will check if the user requires redirecting to the auth
@@ -96,10 +96,11 @@ class Client
     */
     public function getLoginUrl($params=array())
     {
-        if (! array_key_exists('login_url', $this->options))
+        if (! array_key_exists('server_url', $this->options))
             throw new MissingUrlException('Login URL not set in client');
 
-        return $this->buildUrlWithParams($this->options['login_url'], $params);
+        $loginUrl = $this->options['server_url'] . '/session';
+        return $this->buildUrlWithParams($loginUrl, $params);
     }
 
     /**
@@ -109,10 +110,11 @@ class Client
     */
     public function getFacebookLoginUrl($params=array())
     {
-        if (! array_key_exists('login_url', $this->options))
+        if (! array_key_exists('server_url', $this->options))
             throw new MissingUrlException('Login URL not set in client');
 
-        return $this->buildUrlWithParams($this->options['login_url'] . '/facebook', $params);
+        $fbLoginUrl = $this->options['server_url'] . '/facebook';
+        return $this->buildUrlWithParams($fbLoginUrl, $params);
     }
 
     /**
@@ -122,10 +124,11 @@ class Client
     */
     public function getLogoutUrl($params=array())
     {
-        if (! array_key_exists('login_url', $this->options))
+        if (! array_key_exists('server_url', $this->options))
             throw new MissingUrlException('Login URL not set in client');
 
-        return $this->buildUrlWithParams($this->options['login_url'], $params);
+        $logoutUrl = $this->options['server_url'] . '/session';
+        return $this->buildUrlWithParams($logoutUrl, $params);
     }
 
     /**
@@ -135,11 +138,11 @@ class Client
     */
     public function getRegisterUrl($params=array())
     {
-        // set default returnTo to the existing page
-        if (! array_key_exists('register_url', $this->options))
-            throw new MissingUrlException('Register URL not set in client');
+        if (! array_key_exists('server_url', $this->options))
+            throw new MissingUrlException('Login URL not set in client');
 
-        return $this->buildUrlWithParams($this->options['register_url'], $params);
+        $registerUrl = $this->options['server_url'] . '/accounts';
+        return $this->buildUrlWithParams($registerUrl, $params);
     }
 
     /**
