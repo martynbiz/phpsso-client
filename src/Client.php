@@ -81,9 +81,7 @@ class Client
             if ($authToken) {
 
                 // redirect to login, but with passive
-                $loginUrl = $this->getLoginUrl(array_merge($params, array(
-                    'passive' => true,
-                )));
+                $loginUrl = $this->getLoginUrl( array_merge($params) );
                 $this->redirect($loginUrl);
             }
         }
