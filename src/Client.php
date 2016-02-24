@@ -88,59 +88,73 @@ class Client
     }
 
     /**
-    * Get the login URL, the same URL is used for GET and POST requests
-    * @param array $params e.g. GET params returnTo=http://...
-    * @return string
-    */
+     * Get the login URL, the same URL is used for GET and POST requests
+     * @param array $params e.g. GET params returnTo=http://...
+     * @return string
+     */
     public function getLoginUrl($params=array())
     {
         if (! array_key_exists('server_url', $this->options))
-            throw new MissingUrlException('Login URL not set in client');
+            throw new MissingUrlException('Server URL not set in client');
 
         $loginUrl = $this->options['server_url'] . '/session';
         return $this->buildUrlWithParams($loginUrl, $params);
     }
 
     /**
-    * Get the login URL, the same URL is used for GET and POST requests
-    * @param array $params e.g. GET params returnTo=http://...
-    * @return string
-    */
+     * Get the login URL, the same URL is used for GET and POST requests
+     * @param array $params e.g. GET params returnTo=http://...
+     * @return string
+     */
     public function getFacebookLoginUrl($params=array())
     {
         if (! array_key_exists('server_url', $this->options))
-            throw new MissingUrlException('Login URL not set in client');
+            throw new MissingUrlException('Server URL not set in client');
 
         $fbLoginUrl = $this->options['server_url'] . '/session/facebook';
         return $this->buildUrlWithParams($fbLoginUrl, $params);
     }
 
     /**
-    * Get the logout URL, the same URL is used for GET and POST requests
-    * @param array $params e.g. GET params returnTo=http://...
-    * @return string
-    */
+     * Get the logout URL, the same URL is used for GET and POST requests
+     * @param array $params e.g. GET params returnTo=http://...
+     * @return string
+     */
     public function getLogoutUrl($params=array())
     {
         if (! array_key_exists('server_url', $this->options))
-            throw new MissingUrlException('Login URL not set in client');
+            throw new MissingUrlException('Server URL not set in client');
 
         $logoutUrl = $this->options['server_url'] . '/session';
         return $this->buildUrlWithParams($logoutUrl, $params);
     }
 
     /**
-    * Get the register URL, the same URL is used for GET and POST requests
-    * @param array $params e.g. GET params returnTo=http://...
-    * @return string
-    */
+     * Get the register URL, the same URL is used for GET and POST requests
+     * @param array $params e.g. GET params returnTo=http://...
+     * @return string
+     */
     public function getRegisterUrl($params=array())
     {
         if (! array_key_exists('server_url', $this->options))
-            throw new MissingUrlException('Login URL not set in client');
+            throw new MissingUrlException('Server URL not set in client');
 
         $registerUrl = $this->options['server_url'] . '/accounts';
         return $this->buildUrlWithParams($registerUrl, $params);
+    }
+
+    /**
+     * Get the register URL, the same URL is used for GET and POST requests
+     * @param array $params e.g. GET params returnTo=http://...
+     * @return string
+     */
+    public function getForgotPasswordUrl($params=array())
+    {
+        if (! array_key_exists('server_url', $this->options))
+            throw new MissingUrlException('Server URL not set in client');
+
+        $forgotPasswordUrl = $this->options['server_url'] . '/accounts/resetpassword';
+        return $this->buildUrlWithParams($forgotPasswordUrl, $params);
     }
 
     /**
