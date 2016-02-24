@@ -111,7 +111,7 @@ class Client
         if (! array_key_exists('server_url', $this->options))
             throw new MissingUrlException('Login URL not set in client');
 
-        $fbLoginUrl = $this->options['server_url'] . '/facebook';
+        $fbLoginUrl = $this->options['server_url'] . '/session/facebook';
         return $this->buildUrlWithParams($fbLoginUrl, $params);
     }
 
