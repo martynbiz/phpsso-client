@@ -174,9 +174,6 @@ class Client
         // get the path to the resource e.g. /path/to/resource?params=should-be-included-too
         $url .= $_SERVER["REQUEST_URI"];
 
-        if (! empty($_SERVER['QUERY_STRING']))
-            $url.= '?' . $_SERVER['QUERY_STRING'];
-
         return $url;
     }
 
