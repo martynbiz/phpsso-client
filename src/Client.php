@@ -206,6 +206,7 @@ class Client
             $authorizationUrl = $provider->getAuthorizationUrl();
 
             // Get the state generated for you and store it to the session.
+            // TODO use namespace?
             $_SESSION['oauth2state'] = $provider->getState();
 
             // Redirect the user to the authorization URL.
@@ -215,6 +216,7 @@ class Client
         // Check given state against previously stored one to mitigate CSRF attack
         } elseif (empty($_GET['state']) || ($_GET['state'] !== $_SESSION['oauth2state'])) {
 
+            // TODO use namespace?
             unset($_SESSION['oauth2state']);
             exit('Invalid state');
 
@@ -229,13 +231,6 @@ class Client
                     'code' => $_GET['code']
                 ]);
 
-                // // We have an access token, which we may use in authenticated
-                // // requests against the service provider's API.
-                // echo $accessToken->getToken() . "\n";
-                // echo $accessToken->getRefreshToken() . "\n";
-                // echo $accessToken->getExpires() . "\n";
-                // echo ($accessToken->hasExpired() ? 'expired' : 'not expired') . "\n";
-
                 // Using the access token, we may look up details about the
                 // resource owner.
                 $resourceOwner = $provider->getResourceOwner($accessToken);
@@ -243,15 +238,6 @@ class Client
 
                 // TODO write session directly?
                 $_SESSION[ $this->options['session_namespace'] ] = $resourceOwner->toArray();
-
-                // // The provider provides a way to get an authenticated API request for
-                // // the service, using the access token; it returns an object conforming
-                // // to Psr\Http\Message\RequestInterface.
-                // $request = $provider->getAuthenticatedRequest(
-                //     'GET',
-                //     'http://brentertainment.com/oauth2/lockdin/resource',
-                //     $accessToken
-                // );
 
             } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 
@@ -261,6 +247,14 @@ class Client
             }
 
         }
+    }
+
+    /**
+     * Will empty the session variables for an authenticated session
+     */
+    public function clearSession()
+    {
+        $_SESSION[ $this->options['session_namespace'] ] = array();
     }
 
     /**
