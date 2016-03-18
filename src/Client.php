@@ -57,35 +57,14 @@ class Client
         return $this->storage->getContents();
     }
 
-    // /**
-    // * Essentially logging a user out of all applications - used mainly when we
-    // * do a forceLogin. Will delete sso/mwauth session variables.
-    // * @return void
-    // */
-    // public function clearAttributes()
-    // {
-    //     $this->storage->emptyContents();
-    // }
-
     /**
-     * This is called and will check if the user requires redirecting to the auth
-     * app to login if auth_token is set.
-     */
-    public function checkAuthToken($params=array())
+    * Essentially logging a user out of all applications - used mainly when we
+    * do a forceLogin. Will delete sso/mwauth session variables.
+    * @return void
+    */
+    public function clearAttributes()
     {
-        // only trigger remember me code if not authenticated, we don't need this
-        // at all if they are already signed in (duh)
-        if (!$this->isAuthenticated()) {
-
-            // redirect if token found
-            $authToken = @$_COOKIE[ $this->options['auth_token']['name'] ];
-            if ($authToken) {
-
-                // redirect to login, but with passive
-                $loginUrl = $this->getLoginUrl( array_merge($params) );
-                $this->redirect($loginUrl);
-            }
-        }
+        $this->storage->emptyContents();
     }
 
     /**
@@ -250,12 +229,44 @@ class Client
     }
 
     /**
-     * Will empty the session variables for an authenticated session
+     * This is called and will check if the user requires redirecting to the auth
+     * app to login if auth_token is set.
+     * @param array $params Eg. returnTo
      */
-    public function clearSession()
+    public function passiveLogin($params=array())
     {
-        $_SESSION[ $this->options['session_namespace'] ] = array();
+        // only trigger remember me code if not authenticated, we don't need this
+        // at all if they are already signed in (duh)
+        if (! $this->isAuthenticated()) {
+
+            // check if we have checked the login already,
+            $blockTime = @$_SESSION['mwauth__block_passive_login'];
+            $doPassiveLogin = (empty($blockTime) or $blockTime < time());
+            if ($doPassiveLogin) {
+
+                // This will prevent additional passive login attempts
+                $_SESSION['mwauth__block_passive_login'] = time() + 60; // 300 = 5 min
+
+                // redirect to perform the passive login
+                $loginUrl = $this->getLoginUrl( array_merge($params, array(
+
+                    // just to tell the server that we want to do a passive login here
+                    // so if the user is not logged in, return them to returnTo
+                    'passive' => true,
+                )) );
+
+                $this->redirect( $loginUrl );
+            }
+        }
     }
+
+    // /**
+    //  * Will empty the session variables for an authenticated session
+    //  */
+    // public function clearSession()
+    // {
+    //     $_SESSION[ $this->options['session_namespace'] ] = array();
+    // }
 
     /**
      * Will generate a url from a base url, and attach params (inc default returnTo)
