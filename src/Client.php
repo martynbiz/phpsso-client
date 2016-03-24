@@ -3,7 +3,6 @@ namespace SSO\MWAuth;
 
 use SSO\MWAuth\Storage\StorageInterface;
 use SSO\MWAuth\Exception\MissingUrl as MissingUrlException;
-use League\OAuth2\Client\Provider\GenericProvider;
 
 /**
  * This is a framework agnostic class for accessing MWAuth session attributes. It is
@@ -179,85 +178,6 @@ class Client
         $url .= $_SERVER["REQUEST_URI"];
 
         return $url;
-    }
-
-    /**
-     * Will initiate the login process
-     * @param array $params Eg. returnTo
-     */
-    public function login($params=array())
-    {
-        // TODO how to set returnTo, this just assumes that it comes from GET returnTo after
-        // redirect from
-
-        // setup provider from options (e.g. client_id)
-        $provider = new GenericProvider( array(
-            'clientId'                => $this->options['client_id'],
-            'clientSecret'            => $this->options['client_secret'],
-            'redirectUri'             => $params['redirect_uri'], //'http://en.jt.martyndev/login',
-            'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
-            'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
-            'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/getaccount',
-        ) );
-
-        // If we don't have an authorization code then get one
-        if (! isset($_GET['code'])) {
-
-            // Fetch the authorization URL from the provider; this returns the
-            // urlAuthorize option and generates and applies any necessary parameters
-            // (e.g. state).
-            $authorizationUrl = $provider->getAuthorizationUrl();
-
-            // Get the state generated for you and store it to the session.
-            // TODO use namespace?
-            $_SESSION['oauth2state'] = $provider->getState();
-
-            // Redirect the user to the authorization URL.
-            header('Location: ' . $authorizationUrl);
-            exit;
-
-        // Check given state against previously stored one to mitigate CSRF attack
-        } elseif (empty($_GET['state']) || ($_GET['state'] !== $_SESSION['oauth2state'])) {
-
-            // TODO use namespace?
-            unset($_SESSION['oauth2state']);
-            exit('Invalid state');
-
-        } else {
-
-            // here we have a $_GET['code'], use it wisely
-
-            try {
-
-                // Try to get an access token using the authorization code grant.
-                $accessToken = $provider->getAccessToken('authorization_code', [
-                    'code' => $_GET['code']
-                ]);
-
-                // Using the access token, we may look up details about the
-                // resource owner.
-                $resourceOwner = $provider->getResourceOwner($accessToken);
-                $attributes = $resourceOwner->toArray();
-
-                // TODO write session directly?
-                $_SESSION[ $this->options['session_namespace'] ] = $resourceOwner->toArray();
-
-            } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
-
-                // Failed to get the access token or user details.
-                exit($e->getMessage());
-
-            }
-
-        }
-    }
-
-    /**
-     * Will empty the session variables for an authenticated session
-     */
-    public function clearSession()
-    {
-        $_SESSION[ $this->options['session_namespace'] ] = array();
     }
 
     /**
