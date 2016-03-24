@@ -82,7 +82,7 @@ class Client
 
                 // redirect to login, but with passive
                 $loginUrl = $this->getLoginUrl( array_merge($params, array(
-                    'passive' => true,
+                    // 'passive' => true,
                 )) );
 
                 $this->redirect($loginUrl);
