@@ -13,9 +13,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
      * @var array
      */
     protected $urls = array(
-        'register_url' => 'http://sso.example.com/users',
-        'login_url' => 'http://sso.example.com/session',
-        'logout_url' => 'http://sso.example.com/session',
+        'server_url' => 'http://sso.example.com',
     );
 
     public function setUp()
@@ -95,7 +93,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $client = new Client($this->storageMock, $this->urls);
 
-        $expected = $this->urls['login_url'] . '?returnTo=http%3A%2F%2Fexample.com%2Fabout';
+        $expected = $this->urls['server_url'] . '/session?returnTo=http%3A%2F%2Fexample.com%2Fabout';
         $actual = $client->getLoginUrl(array(
             'returnTo' => 'http://example.com/about',
         ));
@@ -107,7 +105,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $client = new Client($this->storageMock, $this->urls);
 
-        $expected = $this->urls['login_url'] . '?returnTo=http%3A%2F%2Flocalhost%2Fquestions';
+        $expected = $this->urls['server_url'] . '/session?returnTo=http%3A%2F%2Flocalhost%2Fquestions';
         $actual = $client->getLoginUrl();
 
         $this->assertEquals($expected, $actual);
@@ -131,7 +129,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $client = new Client($this->storageMock, $this->urls);
 
-        $expected = $this->urls['logout_url'] . '?returnTo=http%3A%2F%2Fexample.com%2Fabout';
+        $expected = $this->urls['server_url'] . '/session?returnTo=http%3A%2F%2Fexample.com%2Fabout';
         $actual = $client->getLogoutUrl(array(
             'returnTo' => 'http://example.com/about',
         ));
@@ -143,7 +141,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $client = new Client($this->storageMock, $this->urls);
 
-        $expected = $this->urls['logout_url'] . '?returnTo=http%3A%2F%2Flocalhost%2Fquestions';
+        $expected = $this->urls['server_url'] . '/session?returnTo=http%3A%2F%2Flocalhost%2Fquestions';
         $actual = $client->getLogoutUrl();
 
         $this->assertEquals($expected, $actual);
@@ -167,7 +165,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $client = new Client($this->storageMock, $this->urls);
 
-        $expected = $this->urls['register_url'] . '?returnTo=http%3A%2F%2Fexample.com%2Fabout';
+        $expected = $this->urls['server_url'] . '/accounts?returnTo=http%3A%2F%2Fexample.com%2Fabout';
         $actual = $client->getRegisterUrl(array(
             'returnTo' => 'http://example.com/about',
         ));
@@ -179,7 +177,7 @@ class ClientTest extends \PHPUnit_Framework_TestCase
     {
         $client = new Client($this->storageMock, $this->urls);
 
-        $expected = $this->urls['register_url'] . '?returnTo=http%3A%2F%2Flocalhost%2Fquestions';
+        $expected = $this->urls['server_url'] . '/accounts?returnTo=http%3A%2F%2Flocalhost%2Fquestions';
         $actual = $client->getRegisterUrl();
 
         $this->assertEquals($expected, $actual);
