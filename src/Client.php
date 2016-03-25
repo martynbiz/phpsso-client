@@ -3,7 +3,6 @@ namespace SSO\MWAuth;
 
 use SSO\MWAuth\Storage\StorageInterface;
 use SSO\MWAuth\Exception\MissingUrl as MissingUrlException;
-use League\OAuth2\Client\Provider\GenericProvider;
 
 /**
  * This is a framework agnostic class for accessing MWAuth session attributes. It is
@@ -259,14 +258,6 @@ class Client
             }
         }
     }
-
-    // /**
-    //  * Will empty the session variables for an authenticated session
-    //  */
-    // public function clearSession()
-    // {
-    //     $_SESSION[ $this->options['session_namespace'] ] = array();
-    // }
 
     /**
      * Will generate a url from a base url, and attach params (inc default returnTo)
