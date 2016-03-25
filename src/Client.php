@@ -170,7 +170,7 @@ class Client
         $provider = new GenericProvider( array(
             'clientId'                => $this->options['client_id'],
             'clientSecret'            => $this->options['client_secret'],
-            'redirectUri'             => $params['redirect_uri'], //'http://en.jt.martyndev/login',
+            'redirectUri'             => $params['returnTo'], //'http://en.jt.martyndev/login',
             'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
             'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
             'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/getaccount',
