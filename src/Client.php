@@ -3,6 +3,7 @@ namespace SSO\MWAuth;
 
 use SSO\MWAuth\Storage\StorageInterface;
 use SSO\MWAuth\Exception\MissingUrl as MissingUrlException;
+use League\OAuth2\Client\Provider\GenericProvider;
 
 /**
  * This is a framework agnostic class for accessing MWAuth session attributes. It is

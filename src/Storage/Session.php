@@ -8,7 +8,12 @@ namespace SSO\MWAuth\Storage;
  */
 class Session implements StorageInterface
 {
-    protected $contents;
+    // protected $contents;
+
+    /**
+     * @var string
+     */
+    protected $namespace;
 
     public function __construct($namespace, $values=array())
     {
@@ -19,33 +24,36 @@ class Session implements StorageInterface
         // merge values into the current namespace (don't think we wanna overwrite)
         $_SESSION[$namespace] = array_merge($_SESSION[$namespace], $values);
 
-        // create referrence to namespace
-        $this->contents = $_SESSION[$namespace];
+        // store the name space as we'll use this to fetch the data from session
+        $this->namespace = $namespace;
+
+        // // create referrence to namespace
+        // $this->contents = &$_SESSION[$namespace];
     }
 
     public function offsetExists($index) {
-        return isset($this->contents[$index]);
+        return isset($_SESSION[$this->namespace][$index]);
     }
 
     public function offsetGet($index) {
         if($this->offsetExists($index)) {
-            return $this->contents[$index];
+            return $_SESSION[$this->namespace][$index];
         }
         return false;
     }
 
     public function offsetSet($index, $value) {
         if($index) {
-            $this->contents[$index] = $value;
+            $_SESSION[$this->namespace][$index] = $value;
         } else {
-            $this->contents[] = $value;
+            $_SESSION[$this->namespace][] = $value;
         }
         return true;
 
     }
 
     public function offsetUnset($index) {
-        unset($this->contents[$index]);
+        unset($_SESSION[$this->namespace][$index]);
         return true;
     }
 
@@ -55,7 +63,7 @@ class Session implements StorageInterface
      * @return array
      */
     public function getContents() {
-        return $this->contents;
+        return $_SESSION[$this->namespace];
     }
 
     /**
@@ -63,6 +71,6 @@ class Session implements StorageInterface
      * @return void
      */
     public function emptyContents() {
-        return $this->contents = array();
+        $_SESSION[$this->namespace] = array();
     }
 }
