@@ -3,7 +3,8 @@ namespace SSO\MWAuth;
 
 use SSO\MWAuth\Storage\StorageInterface;
 use SSO\MWAuth\Exception\MissingUrl as MissingUrlException;
-use League\OAuth2\Client\Provider\GenericProvider;
+// use League\OAuth2\Client\Provider\GenericProvider;
+use SSO\MWAuth\OAuth2\Provider;
 
 /**
  * This is a framework agnostic class for accessing MWAuth session attributes. It is
@@ -27,13 +28,8 @@ class Client
 
     public function __construct(StorageInterface $storage, $options=array())
     {
-        // set default options
-        $this->options = array_merge( array(
-            // 'namespace' => 'mwauth__', // this is the namespace in the session we'll tap into
-        ), $options);
-
-        // set our storage object
-        $this->storage = $storage; //new Session($options['namespace']);
+        $this->storage = $storage;
+        $this->options = $options;
     }
 
     /**
@@ -54,7 +50,9 @@ class Client
     */
     public function getAttributes()
     {
-        return $this->storage->getContents();
+        $contents = $this->storage->getContents();
+
+        return (isset($contents['attributes'])) ? $contents['attributes'] : array();
     }
 
     /**
@@ -163,18 +161,17 @@ class Client
      */
     public function login($params=array())
     {
-        // TODO how to set returnTo, this just assumes that it comes from GET returnTo after
-        // redirect from
-
         // setup provider from options (e.g. client_id)
-        $provider = new GenericProvider( array(
+        $provider = new Provider( array(
             'clientId'                => $this->options['client_id'],
             'clientSecret'            => $this->options['client_secret'],
-            'redirectUri'             => $params['returnTo'], //'http://en.jt.martyndev/login',
+            'redirectUri'             => $params['returnTo'],
             'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
             'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
             'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/getaccount',
         ) );
+
+        // $this->update(array(), array());
 
         // If we don't have an authorization code then get one
         if (! isset($_GET['code'])) {
@@ -210,13 +207,14 @@ class Client
                     'code' => $_GET['code']
                 ]);
 
-                // Using the access token, we may look up details about the
-                // resource owner.
-                $resourceOwner = $provider->getResourceOwner($accessToken);
-                $attributes = $resourceOwner->toArray();
+                // store the access token for later use too. we might use this
+                // for updating the account
+                $this->storage['access_token'] = $accessToken;
 
-                // TODO write session directly?
-                $_SESSION[ $this->options['session_namespace'] ] = $resourceOwner->toArray();
+                // Using the access token, we may look up details about the
+                // resource owner and write to storage
+                $resourceOwner = $provider->getResourceOwner($accessToken);
+                $this->storage['attributes'] = $resourceOwner->toArray();
 
             } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 
@@ -229,17 +227,104 @@ class Client
     }
 
     /**
+     * Will use the access token that was created when the user signed in and
+     * update the users properties on the sso server
+     * @param array $values New values (e.g. email)
+     * @return boolean
+     */
+    public function updateUser($values)
+    {
+        try {
+
+            // get access token from the server. if not found, throw exception
+            // this access_token is set when the user makes an auth request (login)
+            $accessToken = $this->getAccessToken();
+
+            // using access token, send update request to api
+            $provider->updateResourceOwner($accessToken, $values); // ??
+
+            // Update the attributes with the new values from the api
+            $resourceOwner = $provider->getResourceOwner($accessToken);
+            $this->storage['attributes'] = $resourceOwner->toArray();
+
+        } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+
+            // Failed to get the access token
+            exit($e->getMessage());
+
+        }
+    }
+
+    /**
+     * Delete an account (if the user wishes to do so)
+     * @param array $values New values (e.g. email)
+     * @return boolean
+     */
+    public function deleteUser()
+    {
+        try {
+
+            // get access token from the server. if not found, throw exception
+            // this access_token is set when the user makes an auth request (login)
+            $accessToken = $this->getAccessToken();
+
+            // using access token, send update request to api
+            $provider->deleteResourceOwner($accessToken); // ??
+
+            // Clear attributes as the user no longer exists
+            $this->clearAttributes();
+
+        } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
+
+            // Failed to get the access token
+            exit($e->getMessage());
+
+        }
+    }
+
+    /**
+     * Will get the access token from storage. If it has expired it will fetch a
+     * new one
+     * @return AccessToken
+     */
+    protected function getAccessToken()
+    {
+        // get access token from the server. if not found, throw exception
+        // this access_token is set when the user makes an auth request (login)
+        $accessToken = @$this->storage['access_token'];
+        if (!$accessToken) {
+            throw new \Exception('Access token not found.');
+        }
+
+        // access token may have expired, so we need to handle this too
+        // TODO test this for real
+        if ($accessToken->hasExpired()) {
+
+            // get new access token
+            $accessToken = $provider->getAccessToken('refresh_token', [
+                'refresh_token' => $accessToken->getRefreshToken()
+            ]);
+
+            // Purge old access token and store new access token to your data store.
+            $this->storage['access_token'] = $accessToken;
+        }
+
+        return $accessToken;
+    }
+
+    /**
      * This is called and will check if the user requires redirecting to the auth
      * app to login if auth_token is set.
      * @param array $params Eg. returnTo
      */
-    public function passiveLogin($params=array())
+    public function passiveLogin($params=array()) // checkLogin? w/ passive
     {
         // only trigger remember me code if not authenticated, we don't need this
         // at all if they are already signed in (duh)
         if (! $this->isAuthenticated()) {
 
             // check if we have checked the login already,
+            // TODO put this in the app, not fixed in the client
             $blockTime = @$_SESSION['mwauth__block_passive_login'];
             $doPassiveLogin = (empty($blockTime) or $blockTime < time());
             if ($doPassiveLogin) {
