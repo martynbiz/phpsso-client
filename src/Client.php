@@ -3,7 +3,6 @@ namespace SSO\MWAuth;
 
 use SSO\MWAuth\Storage\StorageInterface;
 use SSO\MWAuth\Exception\MissingUrl as MissingUrlException;
-// use League\OAuth2\Client\Provider\GenericProvider;
 use SSO\MWAuth\OAuth2\Provider;
 
 /**
@@ -168,7 +167,7 @@ class Client
             'redirectUri'             => $params['returnTo'],
             'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
             'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
-            'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/getaccount',
+            'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
         ) );
 
         // $this->update(array(), array());
