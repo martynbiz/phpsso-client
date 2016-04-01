@@ -16,7 +16,7 @@ namespace SSO\MWAuth\OAuth2;
 
 // use InvalidArgumentException;
 // use League\OAuth2\Client\Provider\Exception\IdentityProviderException;
-// use League\OAuth2\Client\Token\AccessToken;
+use League\OAuth2\Client\Token\AccessToken;
 // use League\OAuth2\Client\Tool\BearerAuthorizationTrait;
 // use Psr\Http\Message\ResponseInterface;
 
@@ -241,13 +241,20 @@ class Provider extends \League\OAuth2\Client\Provider\GenericProvider //Abstract
      * @param  AccessToken $token
      * @return ResourceOwnerInterface
      */
-    public function updateResourceOwner(AccessToken $token, $values)
+    public function updateResourceOwner(AccessToken $token, $params)
     {
+        // we use the same url for get, update, delete; just the method is different
         $url = $this->getResourceOwnerDetailsUrl($token);
-        $request = $this->getAuthenticatedRequest(self::METHOD_PUT, $url, $token);
-        $response = $this->getResponse($request);
+        $method = self::METHOD_PUT;
+        $options = array(
+            'headers' => ['content-type' => 'application/x-www-form-urlencoded'],
+            'body' => http_build_query($params),
+        );
 
-        // return $this->createResourceOwner($response, $token);
+        // build request/ get response
+        $request = $this->getAuthenticatedRequest($method, $url, $token, $options);
+
+        return $this->getResponse($request);
     }
 
     /**

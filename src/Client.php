@@ -4,6 +4,7 @@ namespace SSO\MWAuth;
 use SSO\MWAuth\Storage\StorageInterface;
 use SSO\MWAuth\Exception\MissingUrl as MissingUrlException;
 use SSO\MWAuth\OAuth2\Provider;
+use League\OAuth2\Client\Provider\GenericResourceOwner;
 
 /**
  * This is a framework agnostic class for accessing MWAuth session attributes. It is
@@ -160,6 +161,9 @@ class Client
      */
     public function login($params=array())
     {
+        // if user is already authenticated then return
+        if ($this->isAuthenticated()) return;
+
         // setup provider from options (e.g. client_id)
         $provider = new Provider( array(
             'clientId'                => $this->options['client_id'],
@@ -226,6 +230,40 @@ class Client
     }
 
     /**
+     * This is called and will check if the user requires redirecting to the auth
+     * app to login if auth_token is set.
+     * @param array $params Eg. returnTo
+     */
+    public function passiveLogin($params=array()) // checkLogin? w/ passive
+    {
+        // only trigger remember me code if not authenticated, we don't need this
+        // at all if they are already signed in (duh)
+        if (! $this->isAuthenticated()) {
+
+            // check if we have checked the login already, without this we may
+            // end up with an infinate redirect loop
+            // TODO put this in the app, not fixed in the client
+            $blockTime = @$_SESSION['mwauth__block_passive_login'];
+            $doPassiveLogin = (empty($blockTime) or $blockTime < time());
+            if ($doPassiveLogin) {
+
+                // This will prevent additional passive login attempts
+                $_SESSION['mwauth__block_passive_login'] = time() + 60; // 300 = 5 min
+
+                // redirect to perform the passive login
+                $loginUrl = $this->getLoginUrl( array_merge($params, array(
+
+                    // just to tell the server that we want to do a passive login here
+                    // so if the user is not logged in, return them to returnTo
+                    'passive' => true,
+                )) );
+
+                $this->redirect( $loginUrl );
+            }
+        }
+    }
+
+    /**
      * Will use the access token that was created when the user signed in and
      * update the users properties on the sso server
      * @param array $values New values (e.g. email)
@@ -235,16 +273,28 @@ class Client
     {
         try {
 
+            $provider = new Provider( array(
+                'clientId'                => $this->options['client_id'],
+                'clientSecret'            => $this->options['client_secret'],
+                'redirectUri'             => null,
+                'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
+                'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
+                'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
+            ) );
+
             // get access token from the server. if not found, throw exception
             // this access_token is set when the user makes an auth request (login)
             $accessToken = $this->getAccessToken();
 
             // using access token, send update request to api
-            $provider->updateResourceOwner($accessToken, $values); // ??
+            // update session values if successfully updates 
+            $success = $provider->updateResourceOwner($accessToken, $values);
+            if($success) {
+                $resourceOwner = $provider->getResourceOwner($accessToken);
+                $this->storage['attributes'] = $resourceOwner->toArray();
+            }
 
-            // Update the attributes with the new values from the api
-            $resourceOwner = $provider->getResourceOwner($accessToken);
-            $this->storage['attributes'] = $resourceOwner->toArray();
+            return $success;
 
         } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 
@@ -262,6 +312,15 @@ class Client
     public function deleteUser()
     {
         try {
+
+            $provider = new Provider( array(
+                'clientId'                => $this->options['client_id'],
+                'clientSecret'            => $this->options['client_secret'],
+                'redirectUri'             => null,
+                'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
+                'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
+                'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
+            ) );
 
             // get access token from the server. if not found, throw exception
             // this access_token is set when the user makes an auth request (login)
@@ -283,7 +342,7 @@ class Client
 
     /**
      * Will get the access token from storage. If it has expired it will fetch a
-     * new one
+     * new one (refresh)
      * @return AccessToken
      */
     protected function getAccessToken()
@@ -296,12 +355,21 @@ class Client
         }
 
         // access token may have expired, so we need to handle this too
-        // TODO test this for real
-        if ($accessToken->hasExpired()) {
+        // if no refresh token is set, it will just return the expired token
+        if ($accessToken->hasExpired() and $refreshToken = $accessToken->getRefreshToken()) {
+
+            $provider = new Provider( array(
+                'clientId'                => $this->options['client_id'],
+                'clientSecret'            => $this->options['client_secret'],
+                'redirectUri'             => null,
+                'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
+                'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
+                'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
+            ) );
 
             // get new access token
             $accessToken = $provider->getAccessToken('refresh_token', [
-                'refresh_token' => $accessToken->getRefreshToken()
+                'refresh_token' => $refreshToken,
             ]);
 
             // Purge old access token and store new access token to your data store.
@@ -309,39 +377,6 @@ class Client
         }
 
         return $accessToken;
-    }
-
-    /**
-     * This is called and will check if the user requires redirecting to the auth
-     * app to login if auth_token is set.
-     * @param array $params Eg. returnTo
-     */
-    public function passiveLogin($params=array()) // checkLogin? w/ passive
-    {
-        // only trigger remember me code if not authenticated, we don't need this
-        // at all if they are already signed in (duh)
-        if (! $this->isAuthenticated()) {
-
-            // check if we have checked the login already,
-            // TODO put this in the app, not fixed in the client
-            $blockTime = @$_SESSION['mwauth__block_passive_login'];
-            $doPassiveLogin = (empty($blockTime) or $blockTime < time());
-            if ($doPassiveLogin) {
-
-                // This will prevent additional passive login attempts
-                $_SESSION['mwauth__block_passive_login'] = time() + 60; // 300 = 5 min
-
-                // redirect to perform the passive login
-                $loginUrl = $this->getLoginUrl( array_merge($params, array(
-
-                    // just to tell the server that we want to do a passive login here
-                    // so if the user is not logged in, return them to returnTo
-                    'passive' => true,
-                )) );
-
-                $this->redirect( $loginUrl );
-            }
-        }
     }
 
     /**
