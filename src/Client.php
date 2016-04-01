@@ -267,7 +267,7 @@ class Client
      * Will use the access token that was created when the user signed in and
      * update the users properties on the sso server
      * @param array $values New values (e.g. email)
-     * @return boolean
+     * @return League\OAuth2\Client\Provider\GenericResourceOwner
      */
     public function updateUser($values)
     {
@@ -287,14 +287,12 @@ class Client
             $accessToken = $this->getAccessToken();
 
             // using access token, send update request to api
-            // update session values if successfully updates 
-            $success = $provider->updateResourceOwner($accessToken, $values);
-            if($success) {
-                $resourceOwner = $provider->getResourceOwner($accessToken);
-                $this->storage['attributes'] = $resourceOwner->toArray();
-            }
+            // update session values if successfully updates
+            $resourceOwner = $provider->updateResourceOwner($accessToken, $values);
 
-            return $success;
+            $this->storage['attributes'] = $resourceOwner->toArray();
+
+            return $resourceOwner;
 
         } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
 

@@ -253,8 +253,13 @@ class Provider extends \League\OAuth2\Client\Provider\GenericProvider //Abstract
 
         // build request/ get response
         $request = $this->getAuthenticatedRequest($method, $url, $token, $options);
+        $response = $this->sendRequest($request);
+        $parsed = $this->parseResponse($response);
 
-        return $this->getResponse($request);
+        // checks for 'error' name in array response
+        $this->checkResponse($response, $parsed);
+
+        return $this->createResourceOwner($parsed, $token);
     }
 
     /**
