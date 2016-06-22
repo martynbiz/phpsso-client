@@ -170,7 +170,7 @@ class Client
             'clientSecret'            => $this->options['client_secret'],
             'redirectUri'             => $params['returnTo'],
             'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
-            'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
+            'urlAccessToken'          => $this->options['server_url'] . '/oauth/token',
             'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
         ) );
 
