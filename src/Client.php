@@ -165,6 +165,7 @@ class Client
         if ($this->isAuthenticated()) return;
 
         // setup provider from options (e.g. client_id)
+        // will create a new instance here as we need to set returnTo for the auth code
         $provider = new Provider( array(
             'clientId'                => $this->options['client_id'],
             'clientSecret'            => $this->options['client_secret'],
@@ -173,8 +174,6 @@ class Client
             'urlAccessToken'          => $this->options['server_url'] . '/oauth/token',
             'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
         ) );
-
-        // $this->update(array(), array());
 
         // If we don't have an authorization code then get one
         if (! isset($_GET['code'])) {
@@ -201,8 +200,6 @@ class Client
 
         } else {
 
-            // here we have a $_GET['code'], use it wisely
-
             try {
 
                 // Try to get an access token using the authorization code grant.
@@ -216,7 +213,8 @@ class Client
 
                 // Using the access token, we may look up details about the
                 // resource owner and write to storage
-                $resourceOwner = $provider->getResourceOwner($accessToken);
+                $resourceOwner = $this->getResourceOwnerByAccessToken($accessToken);
+
                 $this->storage['attributes'] = $resourceOwner->toArray();
 
             } catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $e) {
@@ -227,6 +225,33 @@ class Client
             }
 
         }
+    }
+
+    /**
+     * A method for authentication and the apis when we have an access token
+     * @param string $accessToken
+     * @return array
+     */
+    public function getProvider()
+    {
+        return new Provider( array(
+            'clientId'                => $this->options['client_id'],
+            'clientSecret'            => $this->options['client_secret'],
+            'redirectUri'             => null,
+            'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
+            'urlAccessToken'          => $this->options['server_url'] . '/oauth/token',
+            'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
+        ) );
+    }
+
+    /**
+     * A method for authentication and the apis when we have an access token
+     * @param string $accessToken
+     * @return array
+     */
+    public function getResourceOwnerByAccessToken($accessToken)
+    {
+        return $this->getProvider()->getResourceOwner($accessToken);
     }
 
     /**
@@ -273,14 +298,15 @@ class Client
     {
         try {
 
-            $provider = new Provider( array(
-                'clientId'                => $this->options['client_id'],
-                'clientSecret'            => $this->options['client_secret'],
-                'redirectUri'             => null,
-                'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
-                'urlAccessToken'          => $this->options['server_url'] . '/oauth/token',
-                'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
-            ) );
+            $provider = $this->getProvider();
+            // $provider = new Provider( array(
+            //     'clientId'                => $this->options['client_id'],
+            //     'clientSecret'            => $this->options['client_secret'],
+            //     'redirectUri'             => null,
+            //     'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
+            //     'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
+            //     'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
+            // ) );
 
             // get access token from the server. if not found, throw exception
             // this access_token is set when the user makes an auth request (login)
@@ -311,14 +337,15 @@ class Client
     {
         try {
 
-            $provider = new Provider( array(
-                'clientId'                => $this->options['client_id'],
-                'clientSecret'            => $this->options['client_secret'],
-                'redirectUri'             => null,
-                'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
-                'urlAccessToken'          => $this->options['server_url'] . '/oauth/token',
-                'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
-            ) );
+            $provider = $this->getProvider();
+            // $provider = new Provider( array(
+            //     'clientId'                => $this->options['client_id'],
+            //     'clientSecret'            => $this->options['client_secret'],
+            //     'redirectUri'             => null,
+            //     'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
+            //     'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
+            //     'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
+            // ) );
 
             // get access token from the server. if not found, throw exception
             // this access_token is set when the user makes an auth request (login)
@@ -356,14 +383,15 @@ class Client
         // if no refresh token is set, it will just return the expired token
         if ($accessToken->hasExpired() and $refreshToken = $accessToken->getRefreshToken()) {
 
-            $provider = new Provider( array(
-                'clientId'                => $this->options['client_id'],
-                'clientSecret'            => $this->options['client_secret'],
-                'redirectUri'             => null,
-                'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
-                'urlAccessToken'          => $this->options['server_url'] . '/oauth/token',
-                'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
-            ) );
+            $provider = $this->getProvider();
+            // $provider = new Provider( array(
+            //     'clientId'                => $this->options['client_id'],
+            //     'clientSecret'            => $this->options['client_secret'],
+            //     'redirectUri'             => null,
+            //     'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
+            //     'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
+            //     'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
+            // ) );
 
             // get new access token
             $accessToken = $provider->getAccessToken('refresh_token', [
