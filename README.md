@@ -11,38 +11,17 @@ TODO
 Install using composer
 
 ```
-"minimum-stability": "dev",
-"repositories": [
-    {
-        "url": "http://gitlab.metroworks.co.jp/sso/mwauth-client.git",
-        "type": "git"
-    },
-],
-"require" : {
-    "sso/mwauth-client": "*@dev",
-}
+composer require martynbiz/phpsso-client
 ```
 
 ## Usage ##
 
-Ensure that your app that you wish to authenticate from is using the same session as MWAuth (check save_path, redis, cookie domain etc)
-
-To test, you can dump $_SESSION and see if the session variables set from MWAuth are present:
-
-```
-var_dump($_SESSION);
-```
-
-If they are there, then you're good to start setting up the client. Otherwise you'll need to debug session and cookie configurations in PHP or the current app. Enjoy :)
-
-Assumming that the session variables are there, we'll configure the client for the MWAuth installation:
-
 ```
 $storage = new \SSO\MWAuth\Storage\Session('jt_sso__');
 $client = new \SSO\MWAuth\Client($storage, array(
-    'register_url' => 'http://sso.jt.martyndev/users',
-    'login_url' => 'http://sso.jt.martyndev/session',
-    'logout_url' => 'http://sso.jt.martyndev/session',
+    'client_id' => 'japantravel',
+    'client_secret' => 'qwertyuiop1234567890',
+    'server_url' => 'http://phpsso.martyndev',
 ));
 ```
 
