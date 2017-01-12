@@ -12,7 +12,7 @@
  * @link https://github.com/thephpleague/oauth2-client GitHub
  */
 
-namespace SSO\MWAuth\OAuth2;
+namespace MartynBiz\Sso\OAuth2;
 
 // use InvalidArgumentException;
 // use League\OAuth2\Client\Provider\Exception\IdentityProviderException;

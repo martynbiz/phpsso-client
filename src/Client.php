@@ -1,5 +1,5 @@
 <?php
-namespace SSO\MWAuth;
+namespace MartynBiz\Sso;
 
 use SSO\MWAuth\Storage\StorageInterface;
 use SSO\MWAuth\Exception\MissingUrl as MissingUrlException;

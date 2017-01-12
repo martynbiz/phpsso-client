@@ -1,5 +1,5 @@
 <?php
-namespace SSO\MWAuth\Storage;
+namespace MartynBiz\Sso\Storage;
 
 /**
  * This ArrayAccess implementation is designed to allow session variables to be

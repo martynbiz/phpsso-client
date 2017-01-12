@@ -1,5 +1,5 @@
 <?php
-namespace SSO\MWAuth\Exception;
+namespace MartynBiz\Sso\Exception;
 
 class MissingUrl extends \Exception
 {

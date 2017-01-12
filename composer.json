@@ -1,9 +1,9 @@
 {
-    "name": "sso/mwauth-client",
+    "name": "martynbiz/phpsso-client",
     "type": "library",
-    "description": "Provides access to session variables set from Metroworks Auth SSO application.",
+    "description": "Manage SSO requests with PHP SSO server.",
     "keywords": ["sso"],
-    "homepage": "http://github.com/sso/mwauth-client",
+    "homepage": "http://github.com/martynbiz/phpsso-client",
     "license": "MIT",
     "authors": [
         {
@@ -15,11 +15,12 @@
     ],
     "autoload": {
         "psr-4": {
-            "SSO\\MWAuth\\": "src"
+            "MartynBiz\\Sso\\": "src"
         }
     },
     "require": {
-        "php": ">=5.3.0"
+        "php": ">=5.3.0",
+        "league/oauth2-client": "^1.3"
     },
     "require-dev": {
         "phpunit/phpunit": "4.8.*"
