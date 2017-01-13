@@ -1,9 +1,9 @@
 <?php
 namespace MartynBiz\Sso;
 
-use SSO\MWAuth\Storage\StorageInterface;
-use SSO\MWAuth\Exception\MissingUrl as MissingUrlException;
-use SSO\MWAuth\OAuth2\Provider;
+use MartynBiz\Sso\Storage\StorageInterface;
+use MartynBiz\Sso\Exception\MissingUrl as MissingUrlException;
+use MartynBiz\Sso\OAuth2\Provider;
 use League\OAuth2\Client\Provider\GenericResourceOwner;
 
 /**
@@ -26,7 +26,7 @@ class Client
      */
     protected $storage;
 
-    public function __construct(StorageInterface $storage, $options=array())
+    public function __construct(StorageInterface $storage, $options=[])
     {
         $this->storage = $storage;
         $this->options = $options;
@@ -170,9 +170,9 @@ class Client
             'clientId'                => $this->options['client_id'],
             'clientSecret'            => $this->options['client_secret'],
             'redirectUri'             => $params['returnTo'],
-            'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
-            'urlAccessToken'          => $this->options['server_url'] . '/oauth/token',
-            'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
+            'urlAuthorize'            => $this->options['server_url'] . '/getcode',
+            'urlAccessToken'          => $this->options['server_url'] . '/gettoken',
+            'urlResourceOwnerDetails' => $this->options['server_url'] . '/user',
         ) );
 
         // If we don't have an authorization code then get one
@@ -185,17 +185,17 @@ class Client
 
             // Get the state generated for you and store it to the session.
             // TODO use namespace?
-            $_SESSION['oauth2state'] = $provider->getState();
+            $this->storage['oauth2state'] = $provider->getState();
 
             // Redirect the user to the authorization URL.
             header('Location: ' . $authorizationUrl);
             exit;
 
         // Check given state against previously stored one to mitigate CSRF attack
-        } elseif (empty($_GET['state']) || ($_GET['state'] !== $_SESSION['oauth2state'])) {
+        } elseif (empty($_GET['state']) || ($_GET['state'] !== $this->storage['oauth2state'])) {
 
             // TODO use namespace?
-            unset($_SESSION['oauth2state']);
+            unset($this->storage['oauth2state']);
             exit('Invalid state');
 
         } else {
@@ -268,12 +268,12 @@ class Client
             // check if we have checked the login already, without this we may
             // end up with an infinate redirect loop
             // TODO put this in the app, not fixed in the client
-            $blockTime = @$_SESSION['mwauth__block_passive_login'];
+            $blockTime = @$this->storage['mwauth__block_passive_login'];
             $doPassiveLogin = (empty($blockTime) or $blockTime < time());
             if ($doPassiveLogin) {
 
                 // This will prevent additional passive login attempts
-                $_SESSION['mwauth__block_passive_login'] = time() + 60; // 300 = 5 min
+                $this->storage['mwauth__block_passive_login'] = time() + 60; // 300 = 5 min
 
                 // redirect to perform the passive login
                 $loginUrl = $this->getLoginUrl( array_merge($params, array(
