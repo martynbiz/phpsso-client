@@ -239,8 +239,8 @@ class Client
             'clientSecret'            => $this->options['client_secret'],
             'redirectUri'             => null,
             'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
-            'urlAccessToken'          => $this->options['server_url'] . '/oauth/token',
-            'urlResourceOwnerDetails' => $this->options['server_url'] . '/api/account',
+            'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
+            'urlResourceOwnerDetails' => $this->options['server_url'] . '/oauth/user',
         ) );
     }
 
