@@ -170,9 +170,9 @@ class Client
             'clientId'                => $this->options['client_id'],
             'clientSecret'            => $this->options['client_secret'],
             'redirectUri'             => $params['returnTo'],
-            'urlAuthorize'            => $this->options['server_url'] . '/getcode',
-            'urlAccessToken'          => $this->options['server_url'] . '/gettoken',
-            'urlResourceOwnerDetails' => $this->options['server_url'] . '/user',
+            'urlAuthorize'            => $this->options['server_url'] . '/oauth/authorize',
+            'urlAccessToken'          => $this->options['server_url'] . '/oauth/access_token',
+            'urlResourceOwnerDetails' => $this->options['server_url'] . '/oauth/user',
         ) );
 
         // If we don't have an authorization code then get one

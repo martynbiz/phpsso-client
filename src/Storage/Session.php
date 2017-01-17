@@ -17,6 +17,12 @@ class Session implements StorageInterface
 
     public function __construct($namespace, $values=array())
     {
+        // some apps, like laravel, don't use session_start
+        // so start session if not already started
+        if (session_status() == PHP_SESSION_NONE) {
+            session_start();
+        }
+
         // if namespace doesn't exist, create it as an empty array
         if (! array_key_exists($namespace, $_SESSION))
             $_SESSION[$namespace] = array();
